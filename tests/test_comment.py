@@ -2,21 +2,20 @@ import datetime
 import random
 import re
 from http import HTTPStatus
-from typing import Tuple, Any, Type, List, Union
+from typing import Any, List, Tuple, Type, Union
 
 import django.test.client
 import pytest
 import pytz
+from adapters.post import PostModelAdapter
+from conftest import KeyVal, _TestModelAttrs, get_a_post_get_response_safely
 from django.conf import settings
-from django.db.models import TextField, DateTimeField, ForeignKey, Model
+from django.db.models import DateTimeField, ForeignKey, Model, TextField
 from django.forms import BaseForm
 from django.utils import timezone
-
-from adapters.post import PostModelAdapter
-from conftest import _TestModelAttrs, KeyVal, get_a_post_get_response_safely
 from fixtures.types import CommentModelAdapterT
-from form.base_form_tester import (
-    FormValidationException, AuthorisedSubmitTester)
+from form.base_form_tester import (AuthorisedSubmitTester,
+                                   FormValidationException)
 from form.comment.create_form_tester import CreateCommentFormTester
 from form.comment.delete_tester import DeleteCommentTester
 from form.comment.edit_form_tester import EditCommentFormTester
@@ -27,17 +26,35 @@ from test_edit import _test_edit
 
 @pytest.mark.usefixtures("CommentModel", "CommentModelAdapter")
 @pytest.mark.parametrize(
-    ("field", "type", "params", "field_error", "type_error",
-     "param_error", "value_error"),
+    (
+        "field",
+        "type",
+        "params",
+        "field_error",
+        "type_error",
+        "param_error",
+        "value_error",
+    ),
     [
         ("post", ForeignKey, {}, None, None, None, None),
         ("author", ForeignKey, {}, None, None, None, None),
         ("text", TextField, {}, None, None, None, None),
-        ("created_at", DateTimeField, {"auto_now_add": True},
-         None, None, None, None),
+        (
+            "created_at",
+            DateTimeField,
+            {"auto_now_add": True},
+            None,
+            None,
+            None,
+            None,
+        ),
     ],
-    ids=["`post` field", "`author` field",
-         "`text` field", "`created_at` field"]
+    ids=[
+        "`post` field",
+        "`author` field",
+        "`text` field",
+        "`created_at` field",
+    ],
 )
 class TestCommentModelAttrs(_TestModelAttrs):
     @pytest.fixture(autouse=True)
@@ -68,14 +85,14 @@ def test_link_order_in_comment_template():
         "`./blogicum/templates` (на уровне с файлом `manage.py`)."
     )
     comment_template_file = (
-        expected_template_dir / 'includes' / 'comments.html'
+        expected_template_dir / "includes" / "comments.html"
     )
     assert comment_template_file.is_file(), (
         "Убедитесь, что в директории `./blogicum/templates/includes` есть "
         "файл `comments.html`."
     )
     with open(
-            comment_template_file, "r", encoding="utf-8", errors="ignore"
+        comment_template_file, "r", encoding="utf-8", errors="ignore"
     ) as f:
         comments_template = f.read()
     expected_link_order_pattern = re.compile(
@@ -91,11 +108,11 @@ def test_link_order_in_comment_template():
 
 
 def create_comment_creation_forms(
-        creation_tester: CreateCommentFormTester,
-        Form: Type[BaseForm],
-        CommentModel: Type[Model],
-        CommentModelAdapter: CommentModelAdapterT,
-        return_single_form: bool = False,
+    creation_tester: CreateCommentFormTester,
+    Form: Type[BaseForm],
+    CommentModel: Type[Model],
+    CommentModelAdapter: CommentModelAdapterT,
+    return_single_form: bool = False,
 ) -> Union[BaseForm, List[BaseForm]]:
     item_ix_start: int = random.randint(1000000, 2000000)
     item_ix_cnt: int = 5
@@ -131,15 +148,15 @@ def create_comment_creation_forms(
 
 @pytest.mark.django_db(transaction=True)
 def test_comment(
-        user_client: django.test.Client,
-        another_user_client: django.test.Client,
-        unlogged_client: django.test.Client,
-        post_with_published_location: Any,
-        another_user: Model,
-        post_comment_context_form_item: Tuple[str, BaseForm],
-        CommentModel: Type[Model],
-        CommentModelAdapter: CommentModelAdapterT,
-        profile_content_tester: ProfilePostContentTester
+    user_client: django.test.Client,
+    another_user_client: django.test.Client,
+    unlogged_client: django.test.Client,
+    post_with_published_location: Any,
+    another_user: Model,
+    post_comment_context_form_item: Tuple[str, BaseForm],
+    CommentModel: Type[Model],
+    CommentModelAdapter: CommentModelAdapterT,
+    profile_content_tester: ProfilePostContentTester,
 ):
     post_with_published_location.author = another_user
     post_with_published_location.save()
@@ -161,7 +178,8 @@ def test_comment(
 
     Form: Type[BaseForm] = type(ctx_form)
     forms_to_create = create_comment_creation_forms(
-        creation_tester, Form, CommentModel, CommentModelAdapter)
+        creation_tester, Form, CommentModel, CommentModelAdapter
+    )
 
     response_on_created, created_items = creation_tester.test_create_several(
         forms_to_create[1:], qs=CommentModel.objects.all()
@@ -182,10 +200,10 @@ def test_comment(
     # check comment count on profile page
     comment_adapter = CommentModelAdapter(created_items[0])
     comment_post_adapter = PostModelAdapter(comment_adapter.post)
-    author_profile_url = f'/profile/{comment_post_adapter.author.username}/'
-    profile_content = (
-        profile_content_tester.user_client_testget(
-            url=author_profile_url).content.decode("utf-8"))
+    author_profile_url = f"/profile/{comment_post_adapter.author.username}/"
+    profile_content = profile_content_tester.user_client_testget(
+        url=author_profile_url
+    ).content.decode("utf-8")
     if comment_count_repr not in profile_content:
         raise AssertionError(
             "Убедитесь, что на странице пользователя под постами отображается"
@@ -250,19 +268,16 @@ def test_comment(
     try:
         response = user_client.get(edit_url[0])
     except CommentModel.DoesNotExist:
-        raise AssertionError(
-            status_404_on_edit_deleted_comment_err_msg
-        )
-    assert response.status_code == HTTPStatus.NOT_FOUND, (
-        status_404_on_edit_deleted_comment_err_msg)
+        raise AssertionError(status_404_on_edit_deleted_comment_err_msg)
+    assert (
+        response.status_code == HTTPStatus.NOT_FOUND
+    ), status_404_on_edit_deleted_comment_err_msg
 
     def _test_delete_unexisting_comment(err_msg):
         try:
             response = user_client.get(delete_url_addr)
         except CommentModel.DoesNotExist:
-            raise AssertionError(
-                err_msg
-            )
+            raise AssertionError(err_msg)
         assert response.status_code == HTTPStatus.NOT_FOUND, err_msg
 
     _test_delete_unexisting_comment(
@@ -281,14 +296,14 @@ def test_comment(
 
 @pytest.mark.django_db(transaction=True)
 def test_404_on_comment_deleted_post(
-        user_client: django.test.Client,
-        another_user_client: django.test.Client,
-        unlogged_client: django.test.Client,
-        post_with_published_location: Any,
-        another_user: Model,
-        post_comment_context_form_item: Tuple[str, BaseForm],
-        CommentModel: Type[Model],
-        CommentModelAdapter: CommentModelAdapterT,
+    user_client: django.test.Client,
+    another_user_client: django.test.Client,
+    unlogged_client: django.test.Client,
+    post_with_published_location: Any,
+    another_user: Model,
+    post_comment_context_form_item: Tuple[str, BaseForm],
+    CommentModel: Type[Model],
+    CommentModelAdapter: CommentModelAdapterT,
 ):
     post_with_published_location.author = another_user
     post_with_published_location.save()
@@ -308,8 +323,11 @@ def test_404_on_comment_deleted_post(
 
     Form: Type[BaseForm] = type(ctx_form)
     form_to_create = create_comment_creation_forms(
-        creation_tester, Form, CommentModel, CommentModelAdapter,
-        return_single_form=True
+        creation_tester,
+        Form,
+        CommentModel,
+        CommentModelAdapter,
+        return_single_form=True,
     )
 
     post_with_published_location.delete()

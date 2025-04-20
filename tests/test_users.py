@@ -2,24 +2,22 @@ import inspect
 import os
 from http import HTTPStatus
 from pathlib import Path
-from typing import Tuple, Set, Optional
+from typing import Optional, Set, Tuple
 
 import pytest
+from adapters.user import UserModelAdapter
+from conftest import KeyVal, squash_code
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Model
 from django.http import HttpResponse
 from django.urls import URLPattern, URLResolver, get_resolver
-
-from adapters.user import UserModelAdapter
-from conftest import KeyVal, squash_code
 from form.find_urls import find_links_between_lines
 from form.user.edit_form_tester import EditUserFormTester
 from test_edit import _test_edit
 
 
-class ManageProfileLinksException(Exception):
-    ...
+class ManageProfileLinksException(Exception): ...
 
 
 @pytest.mark.django_db
@@ -77,12 +75,14 @@ def test_custom_err_handlers(client):
     }
     for template in auth_templates:
         try:
-            fpath: Path = Path(settings.TEMPLATES_DIR) / "registration" / template
+            fpath: Path = (
+                Path(settings.TEMPLATES_DIR) / "registration" / template
+            )
         except Exception as e:
             raise AssertionError(
-                'Убедитесь, что переменная TEMPLATES_DIR в настройках проекта '
-                'является строкой (str) или объектом, соответствующим path-like интерфейсу '
-                '(например, экземпляром pathlib.Path). '
+                "Убедитесь, что переменная TEMPLATES_DIR в настройках проекта "
+                "является строкой (str) или объектом, соответствующим path-like интерфейсу "
+                "(например, экземпляром pathlib.Path). "
                 f'При операции Path(settings.TEMPLATES_DIR) / "registration", возникла ошибка: {e}'
             )
         frpath: Path = fpath.relative_to(settings.BASE_DIR)
@@ -93,7 +93,7 @@ def test_custom_err_handlers(client):
 
 @pytest.mark.django_db
 def test_profile(
-        user, another_user, user_client, another_user_client, unlogged_client
+    user, another_user, user_client, another_user_client, unlogged_client
 ):
     user_url = f"/profile/{user.username}/"
     printed_url = "/profile/<username>/"
@@ -108,8 +108,9 @@ def test_profile(
     except User.DoesNotExist:
         raise AssertionError(status_code_not_404_err_msg)
 
-    assert response.status_code == HTTPStatus.NOT_FOUND, (
-        status_code_not_404_err_msg)
+    assert (
+        response.status_code == HTTPStatus.NOT_FOUND
+    ), status_code_not_404_err_msg
 
     user_response: HttpResponse = user_client.get(user_url)
 
@@ -128,9 +129,9 @@ def test_profile(
     )
 
     for profile_user, profile_user_content in (
-            (user, user_content),
-            (user, unlogged_same_page_content),
-            (user, anothers_same_page_content),
+        (user, user_content),
+        (user, unlogged_same_page_content),
+        (user, anothers_same_page_content),
     ):
         _test_user_info_displayed(
             profile_user, profile_user_content, printed_url
@@ -176,7 +177,7 @@ def test_profile(
 
 
 def _test_user_info_displayed(
-        profile_user: Model, profile_user_content: str, printed_url: str
+    profile_user: Model, profile_user_content: str, printed_url: str
 ) -> None:
     if profile_user.first_name not in profile_user_content:
         raise AssertionError(
@@ -191,7 +192,7 @@ def _test_user_info_displayed(
 
 
 def try_get_profile_manage_urls(
-        user_content: str, anothers_page_content: str, ignore_urls: Set[str]
+    user_content: str, anothers_page_content: str, ignore_urls: Set[str]
 ) -> Tuple[str, str]:
     diff_urls = get_extra_urls(
         base_content=anothers_page_content,
@@ -216,9 +217,9 @@ def try_get_profile_manage_urls(
 
 
 def get_extra_urls(
-        base_content: str,
-        extra_content: str,
-        ignore_urls: Optional[Set[str]] = None,
+    base_content: str,
+    extra_content: str,
+    ignore_urls: Optional[Set[str]] = None,
 ):
     ignore_urls = ignore_urls or set()
     find_links_kwargs = dict(

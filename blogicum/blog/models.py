@@ -1,25 +1,32 @@
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
+from django.utils import timezone
 
-from .constants import (
-    DEFAULT_STR_LENGTH,
-    PUBLISHED_HELP_TEXT,
-    CHARFIELD_MAX_LENGTH,
-    SLUGFIELD_MAX_LENGTH
-)
+from .constants import (CHARFIELD_MAX_LENGTH, DEFAULT_STR_LENGTH,
+                        PUBLISHED_HELP_TEXT, SLUGFIELD_MAX_LENGTH)
 
 User = get_user_model()
 
 
+class PublishedManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                is_published=True,
+                category__is_published=True,
+                pub_date__lte=timezone.now(),
+            )
+        )
+
+
 class IsPublishedCreatedAtAbstract(models.Model):
     is_published = models.BooleanField(  # Поле сохранено с is_
-        'Опубликовано',
-        default=True,
-        help_text=PUBLISHED_HELP_TEXT
+        "Опубликовано", default=True, help_text=PUBLISHED_HELP_TEXT
     )
     created_at = models.DateTimeField(  # Поле сохранено с at_
-        'Добавлено',
-        auto_now_add=True
+        "Добавлено", auto_now_add=True
     )
 
     class Meta:
@@ -27,69 +34,95 @@ class IsPublishedCreatedAtAbstract(models.Model):
 
 
 class Post(IsPublishedCreatedAtAbstract):
-    title = models.CharField('Заголовок', max_length=CHARFIELD_MAX_LENGTH)
-    text = models.TextField('Текст')
+    title = models.CharField("Заголовок", max_length=CHARFIELD_MAX_LENGTH)
+    text = models.TextField("Текст")
     pub_date = models.DateTimeField(
-        verbose_name='Дата и время публикации',
-        help_text=('Если установить дату и время в будущем — '
-                   'можно делать отложенные публикации.')
+        verbose_name="Дата и время публикации",
+        help_text=(
+            "Если установить дату и время в будущем — "
+            "можно делать отложенные публикации."
+        ),
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Автор публикации',
-        related_name='posts'
+        verbose_name="Автор публикации",
+        related_name="posts",
     )
     location = models.ForeignKey(
-        'Location',
+        "Location",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name='Местоположение',
-        related_name='posts'
+        verbose_name="Местоположение",
+        related_name="posts",
     )
     category = models.ForeignKey(
-        'Category',
+        "Category",
         on_delete=models.SET_NULL,
         null=True,
-        verbose_name='Категория',
-        related_name='posts'
+        verbose_name="Категория",
+        related_name="posts",
     )
+    image = models.ImageField(
+        "Изображение", upload_to="posts_images/", blank=True, null=True
+    )
+    objects = models.Manager()
+    published = PublishedManager()
 
     class Meta:
-        verbose_name = 'публикация'
-        verbose_name_plural = 'Публикации'
-        ordering = ('-pub_date',)
+        verbose_name = "публикация"
+        verbose_name_plural = "Публикации"
+        ordering = ("-pub_date",)
 
     def __str__(self):
         return self.title[:DEFAULT_STR_LENGTH]
 
 
 class Category(IsPublishedCreatedAtAbstract):
-    title = models.CharField('Заголовок', max_length=CHARFIELD_MAX_LENGTH)
-    description = models.TextField('Описание')
+    title = models.CharField("Заголовок", max_length=CHARFIELD_MAX_LENGTH)
+    description = models.TextField("Описание")
     slug = models.SlugField(
-        verbose_name='Идентификатор',
+        verbose_name="Идентификатор",
         max_length=SLUGFIELD_MAX_LENGTH,
         unique=True,
-        help_text='Идентификатор страницы для URL; '
-        'разрешены символы латиницы, цифры, дефис и подчёркивание.'
+        help_text="Идентификатор страницы для URL; "
+        "разрешены символы латиницы, цифры, дефис и подчёркивание.",
     )
 
     class Meta:
-        verbose_name = 'категория'
-        verbose_name_plural = 'Категории'
+        verbose_name = "категория"
+        verbose_name_plural = "Категории"
 
     def __str__(self):
         return self.title[:DEFAULT_STR_LENGTH]
 
 
 class Location(IsPublishedCreatedAtAbstract):
-    name = models.CharField('Название места', max_length=CHARFIELD_MAX_LENGTH)
+    name = models.CharField("Название места", max_length=CHARFIELD_MAX_LENGTH)
 
     class Meta:
-        verbose_name = 'местоположение'
-        verbose_name_plural = 'Местоположения'
+        verbose_name = "местоположение"
+        verbose_name_plural = "Местоположения"
 
     def __str__(self):
         return self.name[:DEFAULT_STR_LENGTH]
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(
+        Post, on_delete=models.CASCADE, related_name="comments"
+    )
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField(verbose_name="Комментарий")
+    created_at = models.DateTimeField(
+        auto_now_add=True, verbose_name="Дата создания"
+    )
+
+    class Meta:
+        verbose_name = "комментарий"
+        verbose_name_plural = "Комментарии"
+        ordering = ("-created_at",)
+
+    def __str__(self):
+        return self.text[:DEFAULT_STR_LENGTH]
