@@ -2,8 +2,9 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group
+from django.utils.safestring import mark_safe
 
-from .models import Category, Location, Post
+from .models import Category, Comment, Location, Post
 
 admin.site.site_header = "Панель администратора Блога"
 admin.site.site_title = "Администрирование блога"
@@ -25,12 +26,17 @@ class UserAdmin(BaseUserAdmin):
         "last_name",
         "is_staff",
         "posts_count",
+        "comments_count",
     )
     list_display_links = ("username", "email")
 
     @admin.display(description="Кол-во постов")
     def posts_count(self, obj):
         return obj.posts.count() if hasattr(obj, "posts") else 0
+
+    @admin.display(description="Кол-во комментариев")
+    def comments_count(self, obj):
+        return obj.comments.count() if hasattr(obj, "comments") else 0
 
 
 @admin.register(Category)
@@ -63,6 +69,7 @@ class PostAdmin(admin.ModelAdmin):
         "category",
         "is_published",
         "safe_short_text",
+        "display_image",
     )
     list_editable = ("is_published",)
     search_fields = ("title", "text")
@@ -76,3 +83,31 @@ class PostAdmin(admin.ModelAdmin):
         if not obj.text:
             return ""
         return f"{obj.text[:50]}..." if len(obj.text) > 50 else obj.text
+
+    @admin.display(description="Изображение")
+    def display_image(self, obj):
+        if obj.image and obj.image.storage.exists(obj.image.name):
+            return mark_safe(
+                f'<img src="{obj.image.url}" width="80" height="60">'
+            )
+        return "Нет изображения"
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = (
+        "short_text",
+        "author",
+        "post",
+        "created_at",
+        "is_published",
+    )
+    list_editable = ("is_published",)
+    search_fields = ("text",)
+    list_filter = ("is_published", "post")
+    list_select_related = ("author", "post")
+    date_hierarchy = "created_at"
+
+    @admin.display(description="Текст")
+    def short_text(self, obj):
+        return f"{obj.text[:100]}..." if len(obj.text) > 100 else obj.text

@@ -8,28 +8,33 @@ from .constants import (CHARFIELD_MAX_LENGTH, DEFAULT_STR_LENGTH,
 User = get_user_model()
 
 
-class PublishedManager(models.Manager):
-    def get_queryset(self):
-        return (
-            super()
-            .get_queryset()
-            .filter(
-                is_published=True,
-                category__is_published=True,
-                pub_date__lte=timezone.now(),
-            )
-        )
+class PostQuerySet(models.QuerySet):
+    def filter_posts_by_publication(self):
+        return self.filter(
+            is_published=True,
+            category__is_published=True,
+            pub_date__lte=timezone.now(),
+        ).order_by("-pub_date")
+
+    def annotate_comment_count(self):
+        return self.annotate(comment_count=models.Count("comments"))
 
 
-class IsPublishedCreatedAtAbstract(models.Model):
-    is_published = models.BooleanField(  # Поле сохранено с is_
-        "Опубликовано", default=True, help_text=PUBLISHED_HELP_TEXT
-    )
-    created_at = models.DateTimeField(  # Поле сохранено с at_
-        "Добавлено", auto_now_add=True
-    )
+class CreatedAtAbstract(models.Model):
+    created_at = models.DateTimeField("Добавлено", auto_now_add=True, db_index=True)
 
     class Meta:
+        abstract = True
+        ordering = ("-created_at",)
+        default_related_name = "%(app_label)s_%(class)s"
+
+
+class IsPublishedCreatedAtAbstract(CreatedAtAbstract):
+    is_published = models.BooleanField(
+        "Опубликовано", default=True, help_text=PUBLISHED_HELP_TEXT
+    )
+
+    class Meta(CreatedAtAbstract.Meta):
         abstract = True
 
 
@@ -67,10 +72,9 @@ class Post(IsPublishedCreatedAtAbstract):
     image = models.ImageField(
         "Изображение", upload_to="posts_images/", blank=True, null=True
     )
-    objects = models.Manager()
-    published = PublishedManager()
+    objects = PostQuerySet.as_manager()
 
-    class Meta:
+    class Meta(IsPublishedCreatedAtAbstract.Meta):
         verbose_name = "публикация"
         verbose_name_plural = "Публикации"
         ordering = ("-pub_date",)
@@ -109,20 +113,29 @@ class Location(IsPublishedCreatedAtAbstract):
         return self.name[:DEFAULT_STR_LENGTH]
 
 
-class Comment(models.Model):
+class Comment(CreatedAtAbstract):
     post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name="comments"
+        Post,
+        on_delete=models.CASCADE,
+        verbose_name="Публикация",
+        related_name="comments",
     )
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    text = models.TextField(verbose_name="Комментарий")
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name="Дата создания"
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Автор комментария",
+        related_name="comments",
+    )
+    text = models.TextField(verbose_name="Текст комментария")
+    is_published = models.BooleanField(
+        verbose_name="Опубликовано", 
+        default=True,
+        help_text="Отметьте, чтобы опубликовать комментарий"
     )
 
-    class Meta:
+    class Meta(CreatedAtAbstract.Meta):
         verbose_name = "комментарий"
         verbose_name_plural = "Комментарии"
-        ordering = ("-created_at",)
 
     def __str__(self):
         return self.text[:DEFAULT_STR_LENGTH]

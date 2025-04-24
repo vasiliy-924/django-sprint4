@@ -1,4 +1,3 @@
-from blog.forms import UserEditForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import redirect, render
@@ -17,26 +16,11 @@ def server_error(request):
 
 
 def registration(request):
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("login")
-    else:
-        form = UserCreationForm()
+    form = UserCreationForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        return redirect("login")
+
     return render(
         request, "registration/registration_form.html", {"form": form}
     )
-
-
-@login_required
-def edit_profile(request):
-    if request.method == "POST":
-        form = UserEditForm(request.POST, instance=request.user)
-        if form.is_valid():
-            form.save()
-            return redirect("blog:profile", username=request.user.username)
-    else:
-        form = UserEditForm(instance=request.user)
-
-    return render(request, "blog/profile_edit.html", {"form": form})
