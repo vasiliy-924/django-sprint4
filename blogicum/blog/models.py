@@ -14,7 +14,7 @@ class PostQuerySet(models.QuerySet):
             is_published=True,
             category__is_published=True,
             pub_date__lte=timezone.now(),
-        ).order_by("-pub_date")
+        )
 
     def annotate_comment_count(self):
         return self.annotate(comment_count=models.Count("comments"))
@@ -25,7 +25,7 @@ class CreatedAtAbstract(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ("-created_at",)
+        ordering = ("created_at",)
         default_related_name = "%(app_label)s_%(class)s"
 
 

@@ -24,21 +24,9 @@
                   href="{% url 'blog:create_post' %}">Написать пост</a></button>
               <button type="button" class="btn btn-outline-primary"><a class="text-decoration-none text-reset"
                   href="{% url 'blog:profile' user.username %}">{{ user.username }}</a></button>
-              <button type="button" class="btn btn-outline-primary">
-                <a id="logout-link" class="text-decoration-none text-reset"
-                    href="{% url 'logout' %}">Выйти</a>
-              </button>
+              <button type="button" class="btn btn-outline-primary"><a class="text-decoration-none text-reset"
+                  href="{% url 'logout' %}">Выйти</a></button>
             </div>
-            <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
-              {% csrf_token %}
-            </form>
-            <script>
-              document.getElementById('logout-link').addEventListener('click', function(e) {
-                e.preventDefault();
-                document.getElementById('logout-form').submit();
-              });
-            </script>
-            
           {% else %}
             <div class="btn-group" role="group" aria-label="Basic outlined example">
               <button type="button" class="btn btn-outline-primary"><a class="text-decoration-none text-reset"
