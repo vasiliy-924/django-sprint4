@@ -22,8 +22,7 @@ class Migration(migrations.Migration):
             model_name="comment",
             name="created_at",
             field=models.DateTimeField(
-                auto_now_add=True, verbose_name="Дата создания"
-            ),
+                auto_now_add=True, verbose_name="Дата создания"),
         ),
         migrations.AlterField(
             model_name="comment",

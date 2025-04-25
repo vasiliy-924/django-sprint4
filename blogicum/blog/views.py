@@ -11,8 +11,11 @@ from .services import get_paginated_page
 
 
 def index(request):
-    post_list = Post.objects.filter_posts_by_publication(
-    ).annotate_comment_count().order_by('-pub_date')
+    post_list = (
+        Post.objects.filter_posts_by_publication()
+        .annotate_comment_count()
+        .order_by("-pub_date")
+    )
     page_obj = get_paginated_page(request, post_list, POSTS_LIMIT)
     return render(request, "blog/index.html", {"page_obj": page_obj})
 
@@ -42,11 +45,13 @@ def post_detail(request, post_id):
 
 def category_posts(request, category_slug):
     category = get_object_or_404(
-        Category.objects.filter(is_published=True),
-        slug=category_slug
+        Category.objects.filter(is_published=True), slug=category_slug
     )
-    posts_list = category.posts.filter_posts_by_publication(
-    ).annotate_comment_count().order_by('-pub_date')
+    posts_list = (
+        category.posts.filter_posts_by_publication()
+        .annotate_comment_count()
+        .order_by("-pub_date")
+    )
     page_obj = get_paginated_page(request, posts_list, POSTS_LIMIT)
     return render(
         request,
@@ -57,7 +62,11 @@ def category_posts(request, category_slug):
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    posts_list = author.posts.all().annotate_comment_count().order_by('-pub_date')
+    posts_list = (
+        author.posts.all()
+        .annotate_comment_count()
+        .order_by("-pub_date")
+    )
 
     if not (request.user == author or request.user.is_staff):
         posts_list = posts_list.filter_posts_by_publication()
@@ -133,7 +142,9 @@ def edit_comment(request, post_id, comment_id):
         form.save()
         return redirect("blog:post_detail", post_id=post_id)
     return render(
-        request, "blog/comment.html", {"form": form, "comment": comment}
+        request,
+        "blog/comment.html",
+        {"form": form, "comment": comment}
     )
 
 

@@ -50,8 +50,7 @@ class Migration(migrations.Migration):
                 (
                     "created_at",
                     models.DateTimeField(
-                        auto_now_add=True, verbose_name="Добавлено"
-                    ),
+                        auto_now_add=True, verbose_name="Добавлено"),
                 ),
             ],
             options={
@@ -74,8 +73,7 @@ class Migration(migrations.Migration):
                 (
                     "name",
                     models.CharField(
-                        max_length=256, verbose_name="Название места"
-                    ),
+                        max_length=256, verbose_name="Название места"),
                 ),
                 (
                     "is_published",
@@ -88,8 +86,7 @@ class Migration(migrations.Migration):
                 (
                     "created_at",
                     models.DateTimeField(
-                        auto_now_add=True, verbose_name="Добавлено"
-                    ),
+                        auto_now_add=True, verbose_name="Добавлено"),
                 ),
             ],
             options={
@@ -117,8 +114,7 @@ class Migration(migrations.Migration):
                 (
                     "pub_date",
                     models.DateTimeField(
-                        verbose_name="Дата и время публикации"
-                    ),
+                        verbose_name="Дата и время публикации"),
                 ),
                 (
                     "is_published",
@@ -131,8 +127,7 @@ class Migration(migrations.Migration):
                 (
                     "created_at",
                     models.DateTimeField(
-                        auto_now_add=True, verbose_name="Добавлено"
-                    ),
+                        auto_now_add=True, verbose_name="Добавлено"),
                 ),
                 (
                     "author",

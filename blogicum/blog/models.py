@@ -2,8 +2,12 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
-from .constants import (CHARFIELD_MAX_LENGTH, DEFAULT_STR_LENGTH,
-                        PUBLISHED_HELP_TEXT, SLUGFIELD_MAX_LENGTH)
+from .constants import (
+    CHARFIELD_MAX_LENGTH,
+    DEFAULT_STR_LENGTH,
+    PUBLISHED_HELP_TEXT,
+    SLUGFIELD_MAX_LENGTH,
+)
 
 User = get_user_model()
 
@@ -21,7 +25,9 @@ class PostQuerySet(models.QuerySet):
 
 
 class CreatedAtAbstract(models.Model):
-    created_at = models.DateTimeField("Добавлено", auto_now_add=True, db_index=True)
+    created_at = models.DateTimeField(
+        "Добавлено", auto_now_add=True, db_index=True
+    )
 
     class Meta:
         abstract = True
@@ -128,9 +134,9 @@ class Comment(CreatedAtAbstract):
     )
     text = models.TextField(verbose_name="Текст комментария")
     is_published = models.BooleanField(
-        verbose_name="Опубликовано", 
+        verbose_name="Опубликовано",
         default=True,
-        help_text="Отметьте, чтобы опубликовать комментарий"
+        help_text="Отметьте, чтобы опубликовать комментарий",
     )
 
     class Meta(CreatedAtAbstract.Meta):
