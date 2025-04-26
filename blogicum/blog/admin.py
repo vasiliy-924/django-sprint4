@@ -88,7 +88,7 @@ class PostAdmin(admin.ModelAdmin):
     def display_image(self, obj):
         if obj.image and obj.image.storage.exists(obj.image.name):
             return mark_safe(
-                f'<img src="{obj.image.url}" width="80" height="60">'
+                f"<img src='{obj.image.url}' width='80' height='60'>"
             )
         return "Нет изображения"
 
@@ -100,11 +100,9 @@ class CommentAdmin(admin.ModelAdmin):
         "author",
         "post",
         "created_at",
-        "is_published",
     )
-    list_editable = ("is_published",)
     search_fields = ("text",)
-    list_filter = ("is_published", "post")
+    list_filter = ("post",)
     list_select_related = ("author", "post")
     date_hierarchy = "created_at"
 

@@ -1,8 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
 
 from .constants import POSTS_LIMIT
 from .forms import CommentForm, PostForm, UserEditForm
@@ -14,26 +12,18 @@ def index(request):
     post_list = (
         Post.objects.filter_posts_by_publication()
         .annotate_comment_count()
-        .order_by("-pub_date")
     )
     page_obj = get_paginated_page(request, post_list, POSTS_LIMIT)
     return render(request, "blog/index.html", {"page_obj": page_obj})
 
 
 def post_detail(request, post_id):
-    base_qs = Post.objects.select_related("author", "category", "location")
-    post = get_object_or_404(base_qs, pk=post_id)
-    is_public = (
-        post.is_published
-        and post.category is not None
-        and post.category.is_published
-        and post.pub_date <= timezone.now()
-    )
-    if not is_public and not (
-        request.user == post.author or request.user.is_staff
-    ):
-        raise Http404
-
+    post = get_object_or_404(Post, pk=post_id)
+    if request.user != post.author:
+        post = get_object_or_404(
+            Post.objects.filter_posts_by_publication(),
+            pk=post_id,
+        )
     form = CommentForm()
     comments = get_paginated_page(request, post.comments.all(), per_page=10)
     return render(
@@ -45,12 +35,13 @@ def post_detail(request, post_id):
 
 def category_posts(request, category_slug):
     category = get_object_or_404(
-        Category.objects.filter(is_published=True), slug=category_slug
+        Category,
+        is_published=True,
+        slug=category_slug,
     )
     posts_list = (
         category.posts.filter_posts_by_publication()
         .annotate_comment_count()
-        .order_by("-pub_date")
     )
     page_obj = get_paginated_page(request, posts_list, POSTS_LIMIT)
     return render(
@@ -65,7 +56,6 @@ def profile(request, username):
     posts_list = (
         author.posts.all()
         .annotate_comment_count()
-        .order_by("-pub_date")
     )
 
     if not (request.user == author or request.user.is_staff):

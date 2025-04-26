@@ -21,7 +21,10 @@ class PostQuerySet(models.QuerySet):
         )
 
     def annotate_comment_count(self):
-        return self.annotate(comment_count=models.Count("comments"))
+        return (self
+                .annotate(comment_count=models.Count("comments"))
+                .order_by("-pub_date")
+                )
 
 
 class CreatedAtAbstract(models.Model):
@@ -133,11 +136,6 @@ class Comment(CreatedAtAbstract):
         related_name="comments",
     )
     text = models.TextField(verbose_name="Текст комментария")
-    is_published = models.BooleanField(
-        verbose_name="Опубликовано",
-        default=True,
-        help_text="Отметьте, чтобы опубликовать комментарий",
-    )
 
     class Meta(CreatedAtAbstract.Meta):
         verbose_name = "комментарий"
