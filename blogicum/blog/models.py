@@ -21,10 +21,9 @@ class PostQuerySet(models.QuerySet):
         )
 
     def annotate_comment_count(self):
-        return (self
-                .annotate(comment_count=models.Count("comments"))
-                .order_by("-pub_date")
-                )
+        return self.annotate(
+            comment_count=models.Count("comments")
+        ).order_by("-pub_date")
 
 
 class CreatedAtAbstract(models.Model):
