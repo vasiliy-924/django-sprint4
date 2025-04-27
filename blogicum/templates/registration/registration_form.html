@@ -1,16 +1,96 @@
 {% extends "base.html" %}
 {% load django_bootstrap5 %}
+
+{% block title %}
+  Регистрация
+{% endblock %}
+
 {% block content %}
-  <div class="col d-flex justify-content-center">
-    <div class="card" style="width: 40rem;">
-      <div class="card-header">
-        Регистрация пользователя
-      </div>
-      <div class="card-body">
-        <form method="post">
+  <div class="max-w-md mx-auto my-12 px-4">
+    <div class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden">
+      <div class="px-8 py-6">
+        <h1 class="text-4xl font-bold text-center text-gray-800 dark:text-gray-100 mb-8">
+          Регистрация пользователя
+        </h1>
+        <form method="post" class="space-y-6">
           {% csrf_token %}
-          {% bootstrap_form form %}
-          {% bootstrap_button button_type="submit" content="Создать" %}
+          <!-- Имя пользователя -->
+          <div class="relative">
+            <input 
+              id="id_username" 
+              name="username" 
+              type="text" 
+              required 
+              class="peer w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl text-gray-900 dark:text-gray-100 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 transition" 
+              placeholder="Имя пользователя"
+            />
+            <label for="id_username"
+              class="absolute left-4 -top-3 bg-white dark:bg-gray-900 px-1 text-sm text-gray-600 dark:text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-gray-500 peer-focus:-top-3 peer-focus:text-gray-600 dark:peer-focus:text-gray-300 peer-focus:text-sm"
+            >
+              Имя пользователя
+            </label>
+          </div>
+
+          <!-- Email -->
+          <div class="relative">
+            <input 
+              id="id_email" 
+              name="email" 
+              type="email" 
+              required 
+              class="peer w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl text-gray-900 dark:text-gray-100 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 transition" 
+              placeholder="Email"
+            />
+            <label for="id_email"
+              class="absolute left-4 -top-3 bg-white dark:bg-gray-900 px-1 text-sm text-gray-600 dark:text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-gray-500 peer-focus:-top-3 peer-focus:text-gray-600 dark:peer-focus:text-gray-300 peer-focus:text-sm"
+            >
+              Email
+            </label>
+          </div>
+
+          <!-- Пароль -->
+          <div class="relative">
+            <input 
+              id="id_password1" 
+              name="password1" 
+              type="password" 
+              required 
+              class="peer w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl text-gray-900 dark:text-gray-100 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 transition" 
+              placeholder="Пароль"
+            />
+            <label for="id_password1"
+              class="absolute left-4 -top-3 bg-white dark:bg-gray-900 px-1 text-sm text-gray-600 dark:text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-gray-500 peer-focus:-top-3 peer-focus:text-gray-600 dark:peer-focus:text-gray-300 peer-focus:text-sm"
+            >
+              Пароль
+            </label>
+          </div>
+
+          <!-- Подтверждение пароля -->
+          <div class="relative">
+            <input 
+              id="id_password2" 
+              name="password2" 
+              type="password" 
+              required 
+              class="peer w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl text-gray-900 dark:text-gray-100 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 transition" 
+              placeholder="Подтверждение пароля"
+            />
+            <label for="id_password2"
+              class="absolute left-4 -top-3 bg-white dark:bg-gray-900 px-1 text-sm text-gray-600 dark:text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-gray-500 peer-focus:-top-3 peer-focus:text-gray-600 dark:peer-focus:text-gray-300 peer-focus:text-sm"
+            >
+              Подтверждение пароля
+            </label>
+          </div>
+
+          <button 
+            type="submit" 
+            class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-lg transition duration-300"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 .667-.333 1-1 1s-1-.333-1-1 .333-1 1-1 1 .333 1 1z M4 7v6m0 0v4m0-4h16m0 0V7m0 4v4" />
+            </svg>
+            Зарегистрироваться
+          </button>
         </form>
       </div>
     </div>

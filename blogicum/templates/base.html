@@ -1,26 +1,39 @@
 {% load static %}
-{% load django_bootstrap5 %}
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" x-data="themeSwitcher()" :class="{ 'dark': isDark }">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="{% static 'img/fav/favicon.ico' %}" type="image">
-    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/fav/apple-touch-icon.png' %}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/fav/favicon-32x32.png' %}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'img/fav/favicon-16x16.png' %}">
-    <title>
-      {% block title %}{% endblock %}
-    </title>
-    {% bootstrap_css %}
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{% block title %}{% endblock %} — Блогикум</title>
+    <!-- Tailwind via CDN & Alpine.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: { extend: {} },
+        plugins: []
+      }
+    </script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="icon" href="{% static 'img/fav/favicon.ico' %}" />
   </head>
-  <body>
-    {% include "includes/header.html" %}
-    <main>
-      <div class="container py-5">
-        {% block content %}{% endblock %}
-      </div>
+  <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+    {% include 'includes/header.html' %}
+    <main class="max-w-4xl mx-auto p-4 grid gap-6">
+      {% block content %}{% endblock %}
     </main>
-    {% include "includes/footer.html" %}
+    {% include 'includes/footer.html' %}
   </body>
 </html>
+
+<script>
+function themeSwitcher() {
+  return {
+    isDark: localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+    toggle() {
+      this.isDark = !this.isDark;
+      localStorage.theme = this.isDark ? 'dark' : 'light';
+    }
+  }
+}
+</script>

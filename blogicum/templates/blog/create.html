@@ -1,46 +1,76 @@
 {% extends "base.html" %}
-{% load django_bootstrap5 %}
+{% load django_bootstrap5 static %}
+
 {% block title %}
-  {% if '/edit/' in request.path %}
-    Редактирование публикации
-  {% elif "/delete/" in request.path %}
-    Удаление публикации
-  {% else %}
-    Добавление публикации
-  {% endif %}
+  {% if '/edit/' in request.path %}Редактирование публикации{% elif '/delete/' in request.path %}Удаление публикации{% else %}Новая публикация{% endif %}
 {% endblock %}
+
 {% block content %}
-  <div class="col d-flex justify-content-center">
-    <div class="card" style="width: 40rem;">
-      <div class="card-header">
-        {% if '/edit/' in request.path %}
-          Редактирование публикации
-        {% elif '/delete/' in request.path %}
-          Удаление публикации
-        {% else %}
-          Добавление публикации
-        {% endif %}
+<div class="max-w-3xl mx-auto bg-white/60 dark:bg-gray-900/60 backdrop-blur-lg rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 hover:shadow-3xl">
+  <div class="px-8 py-6">
+    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
+      {% if '/edit/' in request.path %}Редактировать{% else %}Создать{% endif %} публикацию
+    </h2>
+    <form method="post" enctype="multipart/form-data" x-data="{}" class="space-y-6">
+      {% csrf_token %}
+      <!-- Title Field -->
+      <div class="relative">
+        <input id="id_title" name="title" type="text" required
+               class="peer h-10 w-full border-b-2 border-gray-300 dark:border-gray-600 bg-transparent text-gray-900 dark:text-gray-100 placeholder-transparent focus:outline-none focus:border-blue-500 transition" 
+               placeholder="Название публикации" value="{{ form.title.value|default_if_none:'' }}">
+        <label for="id_title" 
+               class="absolute left-0 -top-3.5 text-gray-600 dark:text-gray-400 text-sm transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-gray-500 peer-focus:-top-3.5 peer-focus:text-gray-600 dark:peer-focus:text-gray-300 peer-focus:text-sm">
+          Заголовок
+        </label>
       </div>
-      <div class="card-body">
-        <form method="post" enctype="multipart/form-data">
-          {% csrf_token %}
-          {% if not '/delete/' in request.path %}
-            {% bootstrap_form form %}
-          {% else %}
-            <article>
-              {% if form.instance.image %}
-                <a href="{{ form.instance.image.url }}" target="_blank">
-                  <img class="border-3 rounded img-fluid img-thumbnail mb-2" src="{{ form.instance.image.url }}">
-                </a>
-              {% endif %}
-              <p>{{ form.instance.pub_date|date:"d E Y" }} | {% if form.instance.location and form.instance.location.is_published %}{{ form.instance.location.name }}{% else %}Планета Земля{% endif %}<br>
-              <h3>{{ form.instance.title }}</h3>
-              <p>{{ form.instance.text|linebreaksbr }}</p>
-            </article>
-          {% endif %}
-          {% bootstrap_button button_type="submit" content="Отправить" %}
-        </form>
+      <!-- Text Field -->
+      <div class="relative">
+        <textarea id="id_text" name="text" rows="6" required
+                  class="peer w-full border-b-2 border-gray-300 dark:border-gray-600 bg-transparent text-gray-900 dark:text-gray-100 placeholder-transparent focus:outline-none focus:border-blue-500 transition resize-none"
+                  placeholder="Текст публикации">{{ form.text.value|default_if_none:'' }}</textarea>
+        <label for="id_text" 
+               class="absolute left-0 -top-3.5 text-gray-600 dark:text-gray-400 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-gray-500 peer-focus:-top-3.5 peer-focus:text-gray-600 dark:peer-focus:text-gray-300 peer-focus:text-sm">
+          Текст публикации
+        </label>
       </div>
-    </div>
+      <!-- Image Upload with Preview -->
+      <div x-data="{preview: null}" class="flex flex-col">
+        <label for="id_image" class="text-gray-700 dark:text-gray-300">Изображение (необязательно)</label>
+        <input id="id_image" name="image" type="file" accept="image/*"
+               @change="preview = URL.createObjectURL($event.target.files[0])"
+               class="mt-2" />
+        <template x-if="preview">
+          <img :src="preview" alt="Превью" class="mt-4 max-h-60 rounded-lg object-cover" />
+        </template>
+      </div>
+      <!-- Date Picker -->
+      <div>
+        <label for="id_pub_date" class="block text-gray-700 dark:text-gray-300 mb-1">Дата и время публикации</label>
+        <input id="id_pub_date" name="pub_date" type="datetime-local" required
+               class="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition" 
+               value="{{ form.pub_date.value|default:form.pub_date.field.initial }}">
+      </div>
+      <!-- Category & Location -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="id_category" class="block text-gray-700 dark:text-gray-300 mb-1">Категория</label>
+          {{ form.category }}
+        </div>
+        <div>
+          <label for="id_location" class="block text-gray-700 dark:text-gray-300 mb-1">Местоположение</label>
+          {{ form.location }}
+        </div>
+      </div>
+      <!-- Submit Button -->
+      <div class="text-right">
+        <button type="submit" class="inline-flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition">
+          <span class="mr-2">Отправить</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </form>
   </div>
+</div>
 {% endblock %}

@@ -1,38 +1,64 @@
 {% extends "base.html" %}
-{% load django_bootstrap5 %}
+{% load django_bootstrap5 static %}
 {% block title %}
-  {% if '/edit_comment/' in request.path %}
-    Редактирование комментария
-  {% else %}
-    Удаление комментария
-  {% endif %}
+  {% if '/edit_comment/' in request.path %}Редактировать комментарий{% else %}Удалить комментарий{% endif %}
 {% endblock %}
+
 {% block content %}
+<div class="max-w-lg mx-auto my-12 p-6 bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl rounded-3xl shadow-2xl">
   {% if user.is_authenticated %}
-    <div class="col d-flex justify-content-center">
-      <div class="card" style="width: 40rem;">
-        <div class="card-header">
-          {% if '/edit_comment/' in request.path %}
-            Редактирование комментария
-          {% else %}
-            Удаление комментария
-          {% endif %}
-        </div>
-        <div class="card-body">
-          <form method="post"
-            {% if '/edit_comment/' in request.path %}
-              action="{% url 'blog:edit_comment' comment.post_id comment.id %}"
-            {% endif %}>
-            {% csrf_token %}
-            {% if not '/delete_comment/' in request.path %}
-              {% bootstrap_form form %}
-            {% else %}
-              <p>{{ comment.text }}</p>
-            {% endif %}
-            {% bootstrap_button button_type="submit" content="Отправить" %}
-          </form>
-        </div>
-      </div>
+    <div class="flex items-center mb-6 space-x-3">
+      {% if '/edit_comment/' in request.path %}
+        <img src="{% static 'icons/pencil.svg' %}" alt="Edit" class="w-6 h-6 text-blue-500"/>
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Редактирование комментария</h1>
+      {% else %}
+        <img src="{% static 'icons/trash.svg' %}" alt="Delete" class="w-6 h-6 text-red-500"/>
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Подтверждение удаления</h1>
+      {% endif %}
     </div>
+    <form
+      method="post"
+      {% if '/edit_comment/' in request.path %}
+        action="{% url 'blog:edit_comment' comment.post_id comment.id %}"
+      {% endif %}
+      class="space-y-6"
+    >
+      {% csrf_token %}
+      {% if '/delete_comment/' in request.path %}
+        <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-300">
+          {{ comment.text }}
+        </div>
+      {% else %}
+        <div class="relative">
+          {{ form.text }}
+          <label for="id_text"
+                 class="absolute left-3 -top-2 px-1 bg-white/50 dark:bg-gray-800/50 text-sm text-gray-600 dark:text-gray-400 rounded">
+            Текст комментария
+          </label>
+        </div>
+      {% endif %}
+
+      <div class="flex justify-end space-x-4">
+        <button
+          type="submit"
+          class="flex items-center px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-lg transition transform hover:scale-105"
+        >
+          <img src="{% static 'icons/check.svg' %}" alt="OK" class="w-5 h-5 mr-2"/>
+          {% if '/edit_comment/' in request.path %}Сохранить{% else %}Удалить{% endif %}
+        </button>
+        <a
+          href="{% url 'blog:post_detail' comment.post_id %}"
+          class="flex items-center px-5 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-full shadow transition transform hover:scale-105"
+        >
+          <img src="{% static 'icons/x.svg' %}" alt="Cancel" class="w-5 h-5 mr-2"/>
+          Отменить
+        </a>
+      </div>
+    </form>
+  {% else %}
+    <p class="text-center text-gray-500 dark:text-gray-400">
+      Только авторизованные пользователи могут управлять комментариями.
+    </p>
   {% endif %}
+</div>
 {% endblock %}

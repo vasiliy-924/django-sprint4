@@ -1,21 +1,63 @@
 {% extends "base.html" %}
-{% load django_bootstrap5 %}
-{% block title %}
-  Редактирование профиля
-{% endblock %}
+{% load django_bootstrap5 static %}
+
+{% block title %}Редактирование профиля{% endblock %}
+
 {% block content %}
-  <div class="col d-flex justify-content-center">
-    <div class="card" style="width: 40rem;">
-      <div class="card-header">
-        Редактирование профиля - {{ request.user.username }}
-      </div>
-      <div class="card-body">
-        <form method="post">
-          {% csrf_token %}
-          {% bootstrap_form form %}
-          {% bootstrap_button button_type="submit" content="Отправить" %}
-        </form>
-      </div>
+<div class="max-w-md mx-auto bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl rounded-2xl shadow-2xl p-8">
+  <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Редактирование профиля</h2>
+  <form method="post" x-data class="space-y-6">
+    {% csrf_token %}
+    <!-- Username -->
+    <div class="relative">
+      <input id="id_username" name="username" type="text" required
+             class="peer h-10 w-full border-b-2 border-gray-300 dark:border-gray-600 bg-transparent text-gray-900 dark:text-gray-100 placeholder-transparent focus:outline-none focus:border-blue-500 transition" 
+             placeholder="Имя пользователя" value="{{ form.username.value }}">
+      <label for="id_username" 
+             class="absolute left-0 -top-3.5 text-gray-600 dark:text-gray-400 text-sm transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-gray-500 peer-focus:-top-3.5 peer-focus:text-gray-600 dark:peer-focus:text-gray-300 peer-focus:text-sm">
+        Имя пользователя
+      </label>
     </div>
-  </div>
+    <!-- First Name -->
+    <div class="relative">
+      <input id="id_first_name" name="first_name" type="text"
+             class="peer h-10 w-full border-b-2 border-gray-300 dark:border-gray-600 bg-transparent text-gray-900 dark:text-gray-100 placeholder-transparent focus:outline-none focus:border-blue-500 transition" 
+             placeholder="Имя" value="{{ form.first_name.value }}">
+      <label for="id_first_name" 
+             class="absolute left-0 -top-3.5 text-gray-600 dark:text-gray-400 text-sm transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-gray-500 peer-focus:-top-3.5 peer-focus:text-gray-600 dark:peer-focus:text-gray-300 peer-focus:text-sm">
+        Имя
+      </label>
+    </div>
+    <!-- Last Name -->
+    <div class="relative">
+      <input id="id_last_name" name="last_name" type="text"
+             class="peer h-10 w-full border-b-2 border-gray-300 dark:border-gray-600 bg-transparent text-gray-900 dark:text-gray-100 placeholder-transparent focus:outline-none focus:border-blue-500 transition" 
+             placeholder="Фамилия" value="{{ form.last_name.value }}">
+      <label for="id_last_name" 
+             class="absolute left-0 -top-3.5 text-gray-600 dark:text-gray-400 text-sm transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-gray-500 peer-focus:-top-3.5 peer-focus:text-gray-600 dark:peer-focus:text-gray-300 peer-focus:text-sm">
+        Фамилия
+      </label>
+    </div>
+    <!-- Email -->
+    <div class="relative">
+      <input id="id_email" name="email" type="email" required
+             class="peer h-10 w-full border-b-2 border-gray-300 dark:border-gray-600 bg-transparent text-gray-900 dark:text-gray-100 placeholder-transparent focus:outline-none focus:border-blue-500 transition" 
+             placeholder="Email" value="{{ form.email.value }}">
+      <label for="id_email" 
+             class="absolute left-0 -top-3.5 text-gray-600 dark:text-gray-400 text-sm transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-gray-500 peer-focus:-top-3.5 peer-focus:text-gray-600 dark:peer-focus:text-gray-300 peer-focus:text-sm">
+        Email
+      </label>
+    </div>
+    <!-- Submit -->
+    <div class="text-center">
+      <button type="submit" 
+              class="inline-flex items-center px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg transition duration-200">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        Сохранить
+      </button>
+    </div>
+  </form>
+</div>
 {% endblock %}

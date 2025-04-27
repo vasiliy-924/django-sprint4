@@ -1,28 +1,27 @@
 {% extends "base.html" %}
-{% block title %}
-  Страница пользователя {{ profile.username }}
-{% endblock %}
+{% block title %}Профиль: {{ profile.username }}{% endblock %}
 {% block content %}
-  <h1 class="mb-5 text-center ">Страница пользователя {{ profile.username }}</h1>
-  <small>
-    <ul class="list-group list-group-horizontal justify-content-center mb-3">
-      <li class="list-group-item text-muted">Имя пользователя: {% if profile.get_full_name %}{{ profile.get_full_name }}{% else %}не указано{% endif %}</li>
-      <li class="list-group-item text-muted">Регистрация: {{ profile.date_joined }}</li>
-      <li class="list-group-item text-muted">Роль: {% if profile.is_staff %}Админ{% else %}Пользователь{% endif %}</li>
-    </ul>
-    <ul class="list-group list-group-horizontal justify-content-center">
-      {% if user.is_authenticated and request.user == profile %}
-      <a class="btn btn-sm text-muted" href="{% url 'blog:edit_profile' %}">Редактировать профиль</a>
-      <a class="btn btn-sm text-muted" href="{% url 'password_change' %}">Изменить пароль</a>
+  <section class="max-w-3xl mx-auto space-y-8">
+    <header class="text-center space-y-2">
+      <h1 class="text-4xl font-bold">{{ profile.username }}</h1>
+      <p class="text-gray-600 dark:text-gray-400">Регистрация: {{ profile.date_joined|date:"d E Y" }} • Роль: {% if profile.is_staff %}Администратор{% else %}Пользователь{% endif %}</p>
+      {% if user.is_authenticated and user == profile %}
+        <div class="space-x-4">
+          <a href="{% url 'blog:edit_profile' %}" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full transition">Редактировать</a>
+          <a href="{% url 'password_change' %}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-full transition">Пароль</a>
+        </div>
       {% endif %}
-    </ul>
-  </small>
-  <br>
-  <h3 class="mb-5 text-center">Публикации пользователя</h3>
-  {% for post in page_obj %}
-    <article class="mb-5">
-      {% include "includes/post_card.html" %}
-    </article>
-  {% endfor %}
-  {% include "includes/paginator.html" %}
+    </header>
+    <div>
+      <h2 class="text-2xl font-semibold mb-4">Публикации пользователя</h2>
+      <div class="space-y-6">
+        {% for post in page_obj %}
+          {% include "includes/post_card.html" with post=post %}
+        {% empty %}
+          <p class="text-center text-gray-500">У пользователя ещё нет публикаций.</p>
+        {% endfor %}
+      </div>
+      {% include "includes/paginator.html" %}
+    </div>
+  </section>
 {% endblock %}

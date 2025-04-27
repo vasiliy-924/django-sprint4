@@ -1,14 +1,16 @@
 {% extends "base.html" %}
-{% block title %}
-  Публикации в категории {{ category.title }}
-{% endblock %}
+{% block title %}Категория: {{ category.title }}{% endblock %}
 {% block content %}
-  <h1 class="text-center">Публикации в категории - {{ category.title }}</h1>
-  <p class="col-6 offset-3 mb-5 lead text-center">{{ category.description }}</p>
-  {% for post in page_obj %}
-    <article class="mb-5">  
-      {% include "includes/post_card.html" %}
-    </article>   
-  {% endfor %}
-  {% include "includes/paginator.html" %}
+  <section class="space-y-6">
+    <header class="text-center">
+      <h1 class="text-4xl font-bold">{{ category.title }}</h1>
+      <p class="mt-2 text-lg text-gray-600 dark:text-gray-400">{{ category.description }}</p>
+    </header>
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {% for post in page_obj %}
+        {% include "includes/post_card.html" with post=post %}
+      {% endfor %}
+    </div>
+    {% include "includes/paginator.html" %}
+  </section>
 {% endblock %}

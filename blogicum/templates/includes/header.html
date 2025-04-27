@@ -1,42 +1,57 @@
 {% load static %}
-<header>
-  <nav class="navbar navbar-light" style="background-color: lightskyblue">
-    <div class="container">
-      <a class="navbar-brand" href="{% url 'blog:index' %}">
-        <img src="{% static 'img/logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
-        Блогикум
-      </a>
-      {% with request.resolver_match.view_name as view_name %}
-        <ul class="nav  nav-pills">
-          <li class="nav-item">
-            <a class="nav-link {% if view_name == 'pages:about' %} text-white {% endif %}" href="{% url 'pages:about' %}">
-              О проекте
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if view_name == 'pages:rules' %} text-white {% endif %}" href="{% url 'pages:rules' %}">
-              Правила
-            </a>
-          </li>
-          {% if user.is_authenticated %}
-            <div class="btn-group" role="group" aria-label="Basic outlined example">
-              <button type="button" class="btn btn-outline-primary"><a class="text-decoration-none text-reset"
-                  href="{% url 'blog:create_post' %}">Написать пост</a></button>
-              <button type="button" class="btn btn-outline-primary"><a class="text-decoration-none text-reset"
-                  href="{% url 'blog:profile' user.username %}">{{ user.username }}</a></button>
-              <button type="button" class="btn btn-outline-primary"><a class="text-decoration-none text-reset"
-                  href="{% url 'logout' %}">Выйти</a></button>
-            </div>
-          {% else %}
-            <div class="btn-group" role="group" aria-label="Basic outlined example">
-              <button type="button" class="btn btn-outline-primary"><a class="text-decoration-none text-reset"
-                  href="{% url 'login' %}">Войти</a></button>
-              <button type="button" class="btn btn-outline-primary"><a class="text-decoration-none text-reset"
-                  href="{% url 'registration' %}">Регистрация</a></button>
-            </div>
-          {% endif %}
-        </ul>
-      {% endwith %}
+<header class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50">
+  <div class="max-w-4xl mx-auto flex items-center justify-between p-4">
+    <a href="{% url 'blog:index' %}" class="flex items-center space-x-2">
+      <img src="{% static 'img/logo.png' %}" alt="Logo" class="h-8 w-8 rounded-md" />
+      <span class="font-bold text-lg">Блогикум</span>
+    </a>
+    <nav class="hidden md:flex space-x-4">
+      <a href="{% url 'pages:about' %}" class="hover:underline">О проекте</a>
+      <a href="{% url 'pages:rules' %}" class="hover:underline">Правила</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'blog:create_post' %}" class="btn">Написать пост</a>
+        <a href="{% url 'blog:profile' user.username %}" class="btn">{{ user.username }}</a>
+
+        <!-- Форма для выхода с методом POST -->
+        <form action="{% url 'logout' %}" method="post" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn text-red-500">Выйти</button>
+        </form>
+
+      {% else %}
+        <a href="{% url 'login' %}" class="btn">Войти</a>
+        <a href="{% url 'registration' %}" class="btn">Регистрация</a>
+      {% endif %}
+    </nav>
+    <!-- Mobile menu button -->
+    <button @click="open=!open" class="md:hidden p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
+      <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+           viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round"
+           stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      <svg x-show="open" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+           viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round"
+           stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <!-- Mobile menu -->
+  <div x-show="open" @click.outside="open=false" class="md:hidden bg-white dark:bg-gray-800">
+    <div class="flex flex-col space-y-1 p-4">
+      <a href="{% url 'pages:about' %}" class="hover:underline">О проекте</a>
+      <a href="{% url 'pages:rules' %}" class="hover:underline">Правила</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'blog:create_post' %}" class="hover:underline">Написать пост</a>
+        <a href="{% url 'blog:profile' user.username %}" class="hover:underline">{{ user.username }}</a>
+
+        <!-- Форма для выхода в мобильном меню -->
+        <form action="{% url 'logout' %}" method="post" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="hover:underline text-red-500">Выйти</button>
+        </form>
+        
+      {% else %}
+        <a href="{% url 'login' %}" class="hover:underline">Войти</a>
+        <a href="{% url 'registration' %}" class="hover:underline">Регистрация</a>
+      {% endif %}
     </div>
-  </nav>
+  </div>
 </header>

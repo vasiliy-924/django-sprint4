@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
-  <div class="col d-flex justify-content-center">
-    <div class="card" style="width: 40rem;">
-      <div class="card-header">
+  <div class="max-w-lg mx-auto space-y-6">
+    <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-md rounded-2xl shadow-lg p-8">
+      <h2 class="text-2xl font-semibold mb-6 text-center text-gray-900 dark:text-gray-100">
         Вы вышли из системы!
-      </div>
-      <div class="card-body">
-        <p><a href="{% url 'login' %}">Войти снова</a></p>
-        <p><a href="{% url 'blog:index' %}">На главную</a></p>
+      </h2>
+      <div class="text-center">
+        <p><a href="{% url 'login' %}" class="text-blue-500 hover:underline">Войти снова</a></p>
+        <p><a href="{% url 'blog:index' %}" class="text-blue-500 hover:underline">На главную</a></p>
       </div>
     </div>
   </div>
