@@ -109,7 +109,7 @@ def delete_post(request, post_id):
         post.delete()
         return redirect("blog:profile", username=request.user.username)
     form = PostForm(instance=post)
-    return render(request, "blog/create.html", {"form": form})
+    return render(request, "blog/confirm_delete.html", {"post": post})
 
 
 @login_required

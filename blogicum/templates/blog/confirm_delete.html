@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow">
+    <h2 class="text-xl font-bold mb-4">Подтвердите удаление</h2>
+    <p>Вы уверены, что хотите удалить пост "{{ post.title }}"?</p>
+    
+    <form method="post" class="mt-6">
+      {% csrf_token %}
+      <input type="hidden" name="post_id" value="{{ post.id }}">
+
+      <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+        Да, удалить
+      </button>
+    </form>
+    
+    <a href="{% url 'blog:post_detail' post.id %}" class="ml-4 text-gray-500 hover:underline">Отмена</a>
+  </div>
+{% endblock %}
