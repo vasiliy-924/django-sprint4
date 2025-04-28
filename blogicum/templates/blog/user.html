@@ -8,6 +8,7 @@
   <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Редактирование профиля</h2>
   <form method="post" x-data class="space-y-6">
     {% csrf_token %}
+    
     <!-- Username -->
     <div class="relative">
       <input id="id_username" name="username" type="text" required
@@ -40,11 +41,17 @@
     </div>
     <!-- Email -->
     <div class="relative">
-      <input id="id_email" name="email" type="email" required
-             class="peer h-10 w-full border-b-2 border-gray-300 dark:border-gray-600 bg-transparent text-gray-900 dark:text-gray-100 placeholder-transparent focus:outline-none focus:border-blue-500 transition" 
-             placeholder="Email" value="{{ form.email.value }}">
+      <input 
+        id="id_email" 
+        name="email" 
+        type="email" 
+        required
+        class="peer h-10 w-full border-b-2 border-gray-300 dark:border-gray-600 bg-transparent text-gray-900 dark:text-gray-100 placeholder-transparent focus:outline-none focus:border-blue-500 transition" 
+        placeholder="Email" 
+        value="{{ form.email.value|default:user.email }}"
+      >
       <label for="id_email" 
-             class="absolute left-0 -top-3.5 text-gray-600 dark:text-gray-400 text-sm transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-gray-500 peer-focus:-top-3.5 peer-focus:text-gray-600 dark:peer-focus:text-gray-300 peer-focus:text-sm">
+        class="absolute left-0 -top-3.5 text-gray-600 dark:text-gray-400 text-sm transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 dark:peer-placeholder-shown:text-gray-500 peer-focus:-top-3.5 peer-focus:text-gray-600 dark:peer-focus:text-gray-300 peer-focus:text-sm">
         Email
       </label>
     </div>
