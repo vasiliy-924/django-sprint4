@@ -13,7 +13,20 @@ User = get_user_model()
 
 
 class PostQuerySet(models.QuerySet):
+    """
+    Кастомный QuerySet для модели Post с дополнительными методами фильтрации.
+    """
+    
     def filter_posts_by_publication(self):
+        """
+        Фильтрует посты по следующим критериям:
+        - пост опубликован
+        - категория поста опубликована
+        - дата публикации не в будущем
+        
+        Returns:
+            QuerySet: Отфильтрованный набор постов
+        """
         return self.filter(
             is_published=True,
             category__is_published=True,
@@ -21,12 +34,23 @@ class PostQuerySet(models.QuerySet):
         )
 
     def annotate_comment_count(self):
+        """
+        Добавляет к постам аннотацию с количеством комментариев
+        и сортирует по дате публикации (новые сверху).
+        
+        Returns:
+            QuerySet: Набор постов с количеством комментариев
+        """
         return self.annotate(
             comment_count=models.Count("comments")
         ).order_by("-pub_date")
 
 
 class CreatedAtAbstract(models.Model):
+    """
+    Абстрактная модель с полем даты создания.
+    Используется как базовая модель для других моделей.
+    """
     created_at = models.DateTimeField(
         "Добавлено", auto_now_add=True, db_index=True
     )
@@ -38,6 +62,10 @@ class CreatedAtAbstract(models.Model):
 
 
 class IsPublishedCreatedAtAbstract(CreatedAtAbstract):
+    """
+    Абстрактная модель с полями даты создания и статуса публикации.
+    Наследуется от CreatedAtAbstract.
+    """
     is_published = models.BooleanField(
         "Опубликовано", default=True, help_text=PUBLISHED_HELP_TEXT
     )
@@ -47,6 +75,11 @@ class IsPublishedCreatedAtAbstract(CreatedAtAbstract):
 
 
 class Post(IsPublishedCreatedAtAbstract):
+    """
+    Модель поста блога.
+    Содержит основную информацию о публикации: заголовок, текст,
+    дату публикации, автора, местоположение, категорию и изображение.
+    """
     title = models.CharField("Заголовок", max_length=CHARFIELD_MAX_LENGTH)
     text = models.TextField("Текст")
     pub_date = models.DateTimeField(
@@ -88,10 +121,20 @@ class Post(IsPublishedCreatedAtAbstract):
         ordering = ("-pub_date",)
 
     def __str__(self):
+        """
+        Возвращает строковое представление поста.
+        
+        Returns:
+            str: Заголовок поста, обрезанный до DEFAULT_STR_LENGTH символов
+        """
         return self.title[:DEFAULT_STR_LENGTH]
 
 
 class Category(IsPublishedCreatedAtAbstract):
+    """
+    Модель категории постов.
+    Содержит название, описание и уникальный slug для URL.
+    """
     title = models.CharField("Заголовок", max_length=CHARFIELD_MAX_LENGTH)
     description = models.TextField("Описание")
     slug = models.SlugField(
@@ -107,10 +150,20 @@ class Category(IsPublishedCreatedAtAbstract):
         verbose_name_plural = "Категории"
 
     def __str__(self):
+        """
+        Возвращает строковое представление категории.
+        
+        Returns:
+            str: Название категории, обрезанное до DEFAULT_STR_LENGTH символов
+        """
         return self.title[:DEFAULT_STR_LENGTH]
 
 
 class Location(IsPublishedCreatedAtAbstract):
+    """
+    Модель местоположения для постов.
+    Содержит название места.
+    """
     name = models.CharField("Название места", max_length=CHARFIELD_MAX_LENGTH)
 
     class Meta:
@@ -118,10 +171,20 @@ class Location(IsPublishedCreatedAtAbstract):
         verbose_name_plural = "Местоположения"
 
     def __str__(self):
+        """
+        Возвращает строковое представление местоположения.
+        
+        Returns:
+            str: Название места, обрезанное до DEFAULT_STR_LENGTH символов
+        """
         return self.name[:DEFAULT_STR_LENGTH]
 
 
 class Comment(CreatedAtAbstract):
+    """
+    Модель комментария к посту.
+    Содержит связь с постом, автором и текст комментария.
+    """
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
@@ -141,4 +204,10 @@ class Comment(CreatedAtAbstract):
         verbose_name_plural = "Комментарии"
 
     def __str__(self):
+        """
+        Возвращает строковое представление комментария.
+        
+        Returns:
+            str: Текст комментария, обрезанный до DEFAULT_STR_LENGTH символов
+        """
         return self.text[:DEFAULT_STR_LENGTH]

@@ -9,6 +9,15 @@ from .services import get_paginated_page
 
 
 def index(request):
+    """
+    Отображает главную страницу блога со списком опубликованных постов.
+    
+    Args:
+        request: HTTP запрос
+        
+    Returns:
+        HttpResponse: Страница с пагинированным списком постов
+    """
     post_list = (
         Post.objects.filter_posts_by_publication()
         .annotate_comment_count()
@@ -18,6 +27,16 @@ def index(request):
 
 
 def post_detail(request, post_id):
+    """
+    Отображает детальную страницу поста с комментариями.
+    
+    Args:
+        request: HTTP запрос
+        post_id: ID поста
+        
+    Returns:
+        HttpResponse: Страница с детальной информацией о посте и комментариями
+    """
     post = get_object_or_404(Post, pk=post_id)
     if request.user != post.author:
         post = get_object_or_404(
@@ -34,6 +53,16 @@ def post_detail(request, post_id):
 
 
 def category_posts(request, category_slug):
+    """
+    Отображает список постов определенной категории.
+    
+    Args:
+        request: HTTP запрос
+        category_slug: URL-слаг категории
+        
+    Returns:
+        HttpResponse: Страница со списком постов выбранной категории
+    """
     category = get_object_or_404(
         Category,
         is_published=True,
@@ -52,6 +81,16 @@ def category_posts(request, category_slug):
 
 
 def profile(request, username):
+    """
+    Отображает профиль пользователя со списком его постов.
+    
+    Args:
+        request: HTTP запрос
+        username: Имя пользователя
+        
+    Returns:
+        HttpResponse: Страница профиля пользователя со списком постов
+    """
     author = get_object_or_404(User, username=username)
     posts_list = (
         author.posts.all()
@@ -69,6 +108,16 @@ def profile(request, username):
 
 @login_required
 def edit_profile(request):
+    """
+    Позволяет пользователю редактировать свой профиль.
+    Требует авторизации.
+    
+    Args:
+        request: HTTP запрос
+        
+    Returns:
+        HttpResponse: Страница редактирования профиля или редирект на профиль
+    """
     form = UserEditForm(request.POST or None, instance=request.user)
     if form.is_valid():
         form.save()
@@ -78,6 +127,16 @@ def edit_profile(request):
 
 @login_required
 def create_post(request):
+    """
+    Позволяет авторизованному пользователю создать новый пост.
+    Требует авторизации.
+    
+    Args:
+        request: HTTP запрос
+        
+    Returns:
+        HttpResponse: Страница создания поста или редирект на профиль
+    """
     form = PostForm(request.POST or None, request.FILES or None)
 
     if form.is_valid():
@@ -90,6 +149,17 @@ def create_post(request):
 
 @login_required
 def edit_post(request, post_id):
+    """
+    Позволяет автору редактировать свой пост.
+    Требует авторизации.
+    
+    Args:
+        request: HTTP запрос
+        post_id: ID поста
+        
+    Returns:
+        HttpResponse: Страница редактирования поста или редирект на детали поста
+    """
     post = get_object_or_404(Post, pk=post_id)
     if request.user != post.author:
         return redirect("blog:post_detail", post_id=post.id)
@@ -102,6 +172,17 @@ def edit_post(request, post_id):
 
 @login_required
 def delete_post(request, post_id):
+    """
+    Позволяет автору удалить свой пост.
+    Требует авторизации.
+    
+    Args:
+        request: HTTP запрос
+        post_id: ID поста
+        
+    Returns:
+        HttpResponse: Страница подтверждения удаления или редирект на профиль
+    """
     post = get_object_or_404(Post, pk=post_id)
     if request.user != post.author:
         return redirect("blog:post_detail", post_id=post.id)
@@ -114,6 +195,17 @@ def delete_post(request, post_id):
 
 @login_required
 def add_comment(request, post_id):
+    """
+    Позволяет авторизованному пользователю добавить комментарий к посту.
+    Требует авторизации.
+    
+    Args:
+        request: HTTP запрос
+        post_id: ID поста
+        
+    Returns:
+        HttpResponse: Редирект на страницу поста
+    """
     post = get_object_or_404(Post, id=post_id)
     form = CommentForm(request.POST or None)
     if form.is_valid():
@@ -126,6 +218,18 @@ def add_comment(request, post_id):
 
 @login_required
 def edit_comment(request, post_id, comment_id):
+    """
+    Позволяет автору редактировать свой комментарий.
+    Требует авторизации.
+    
+    Args:
+        request: HTTP запрос
+        post_id: ID поста
+        comment_id: ID комментария
+        
+    Returns:
+        HttpResponse: Страница редактирования комментария или редирект на пост
+    """
     comment = get_object_or_404(Comment, pk=comment_id, author=request.user)
     form = CommentForm(request.POST or None, instance=comment)
     if form.is_valid():
@@ -140,6 +244,18 @@ def edit_comment(request, post_id, comment_id):
 
 @login_required
 def delete_comment(request, post_id, comment_id):
+    """
+    Позволяет автору удалить свой комментарий.
+    Требует авторизации.
+    
+    Args:
+        request: HTTP запрос
+        post_id: ID поста
+        comment_id: ID комментария
+        
+    Returns:
+        HttpResponse: Страница подтверждения удаления или редирект на пост
+    """
     comment = get_object_or_404(Comment, pk=comment_id, author=request.user)
     if request.method == "POST":
         comment.delete()
